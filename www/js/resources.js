@@ -29,8 +29,14 @@ var resources = (function() {
 	}
 
 	function clickedFolder(row){
-		console.log('folder ' + row.innerHTML);
-		console.log(row.getAttribute('path'));
+		//may want to test if folder is open, then close it
+		//if folder is closed, then open it
+			//use attribute for that?
+		//or maybe just update whole table with contents of folder and include
+		//a back button.
+		var html = row.innerHTML;
+		var newHtml = html.replace('glyphicon-folder-close', 'glyphicon-folder-open');
+		console.log(newHtml);
 		resources.getDetails('/' + row.getAttribute('path'));
 	}
 
@@ -57,7 +63,7 @@ var resources = (function() {
 			else if (file.type === 'DIR'){
 				row.setAttribute('path', file.path + file.name);
 				var folderName = document.createElement('td');
-				folderName.innerHTML = '<span class="glyphicon glyphicon-folder-open"></span> ' + file.name;
+				folderName.innerHTML = '<span class="glyphicon glyphicon-folder-close"></span> ' + file.name;
 				row.appendChild(folderName);
 				var folderSize = document.createElement('td');
 				folderSize.innerHTML = '-';
@@ -76,31 +82,6 @@ var resources = (function() {
 	function showFiles( json ){
 		console.log(json);
 		displayFiles(json, 'tableBody');
-/*		var div = document.createElement('div');
-		for (var i = 0; i < json.contents.length; i++){
-			var file = json.contents[i];
-			if (file.type == 'FILE'){
-				var fileName = document.createElement('input');
-				fileName.type = 'checkbox';
-				fileName.value = file.path + file.name;
-				fileName.name = file.name;
-				div.appendChild(fileName);
-				var caption = document.createElement('label');
-				caption.innerHTML = file.name;
-				div.appendChild(caption);
-			}
-			else if (file.type == 'DIR'){
-				var dirLink = document.createElement('button');
-				dirLink.type = 'button';
-				dirLink.innerHTML = file.name;
-				dirLink.onclick = function(){
-					var temp = file.name;
-					resources.getDetails('/' + this.innerHTML);
-				}
-				div.appendChild(dirLink);
-			}
-		}
-		document.body.appendChild(div);*/
 	}
 
 	function getResources() {
