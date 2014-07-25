@@ -4,6 +4,7 @@ window.onload = function() {
 		host : "http://bd-lkdesktop",
 		token : "3d07f91c1bfa88ed0c94c2a36dda209fa4634c4c"
 	});
+	
 };
 
 var resources = (function() {
@@ -20,12 +21,27 @@ var resources = (function() {
 		document.body.appendChild( div );
 	}
 
+	function clickedFile(row){
+		//higlight selected row
+		//get path to file on server
+		console.log('file: ' + row.innerHTML);
+		console.log(row.getAttribute('path'));
+	}
+
+	function clickedFolder(row){
+		console.log('folder ' + row.innerHTML);
+		console.log(row.getAttribute('path'));
+		resources.getDetails('/' + row.getAttribute('path'));
+	}
+
+
 	//TODO: click to select a row
 	function displayFiles(json, element){
 		for (var i = 0; i < json.contents.length; i++){
 			var row = document.createElement('tr');
 			var file = json.contents[i];
 			if (file.type === 'FILE'){
+				row.setAttribute('path', file.path + file.name);
 				var fileName = document.createElement('td');
 				fileName.innerHTML = '<span class="glyphicon glyphicon-file"></span> ' + file.name;
 				row.appendChild(fileName);
@@ -35,9 +51,11 @@ var resources = (function() {
 				var fileDate = document.createElement('td');
 				fileDate.innerHTML = file.date;
 				row.appendChild(fileDate);
+				row.onclick = function(){clickedFile(this)};
 			}
 			//TODO: click on a folder name to display list of what is inside
 			else if (file.type === 'DIR'){
+				row.setAttribute('path', file.path + file.name);
 				var folderName = document.createElement('td');
 				folderName.innerHTML = '<span class="glyphicon glyphicon-folder-open"></span> ' + file.name;
 				row.appendChild(folderName);
@@ -47,6 +65,7 @@ var resources = (function() {
 				var folderDate = document.createElement('td');
 				folderDate.innerHTML = file.date;
 				row.appendChild(folderDate);
+				row.onclick = function(){clickedFolder(this)};
 			}
 			var table = document.getElementById(element);
 			table.appendChild(row);
