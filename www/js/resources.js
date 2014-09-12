@@ -2,7 +2,7 @@ window.onload = function() {
 
 	resources.init({
 		host : "http://bd-lkdesktop",
-		token : "3d07f91c1bfa88ed0c94c2a36dda209fa4634c4c"
+		token : "2f0a71936bdf6b7d0efaa2e4b8dc0044fd972163"
 	});
 	
 };
@@ -21,35 +21,72 @@ var resources = (function() {
 		document.body.appendChild( div );
 	}
 
+	function clearSelection(){
+		var selected = document.getElementsByClassName('success');
+		var selRow = selected[0];
+		if (selRow != undefined){selRow.removeAttribute('class');}
+	}
+
 	function clickedFile(row){
-		//higlight selected row
 		//get path to file on server
-		console.log('file: ' + row.innerHTML);
+		clearSelection();
+		row.className = 'success';
 		console.log(row.getAttribute('path'));
 	}
 
+	function clickedBreadCrumb(crumb){
+		clearSelection();
+		resources.getDetails(crumb.getAttribute('path'));
+		var breadcrumbs = document.getElementById('breadcrumb');
+		while (breadcrumbs.lastChild != crumb){
+			breadcrumbs.removeChild(breadcrumbs.lastChild);
+		}
+		if (breadcrumbs.childElementCount != 1){
+			breadcrumbs.removeChild(breadcrumbs.lastChild);
+		}
+	}
+
+	function createBreadCrumb(path, name){
+		var breadcrumbs = document.getElementById('breadcrumb');
+		var newBC = document.createElement("li");
+		newBC.setAttribute('path', path);
+		newBC.innerHTML = '<a href="#">' + name + '</a><span class="divider">/</span>';
+		newBC.onclick = function(){clickedBreadCrumb(this)};
+		breadcrumbs.appendChild(newBC);
+	}
+
 	function clickedFolder(row){
-		//may want to test if folder is open, then close it
-		//if folder is closed, then open it
-			//use attribute for that?
-		//or maybe just update whole table with contents of folder and include
-		//a back button.
-		var html = row.innerHTML;
-		var newHtml = html.replace('glyphicon-folder-close', 'glyphicon-folder-open');
-		console.log(newHtml);
-		resources.getDetails('/' + row.getAttribute('path'));
+		var curPath, name;
+		clearSelection();
+		if (row == null) {
+			createBreadCrumb('/', 'Home')
+			resources.getDetails('/')
+		}
+		else{
+			curPath = row.getAttribute('path');
+			var array = curPath.split('/');
+			var name = array[array.length-2];
+			var path = curPath.replace(/[^/]*$/, "");
+			if (name != ""){
+				createBreadCrumb(path, name);
+			}
+			resources.getDetails('/' + row.getAttribute('path'));
+		}			
 	}
 
 
-	//TODO: click to select a row
 	function displayFiles(json, element){
+		//clear table
+		var table = document.getElementById(element);
+		table.innerHTML = '';
+
 		for (var i = 0; i < json.contents.length; i++){
 			var row = document.createElement('tr');
 			var file = json.contents[i];
 			if (file.type === 'FILE'){
 				row.setAttribute('path', file.path + file.name);
 				var fileName = document.createElement('td');
-				fileName.innerHTML = '<span class="glyphicon glyphicon-file"></span> ' + file.name;
+				fileName.innerHTML = '<span class="glyphicon icon-file"></span> ' + file.name;
 				row.appendChild(fileName);
 				var fileSize = document.createElement('td');
 				fileSize.innerHTML = file.size;
@@ -59,11 +96,10 @@ var resources = (function() {
 				row.appendChild(fileDate);
 				row.onclick = function(){clickedFile(this)};
 			}
-			//TODO: click on a folder name to display list of what is inside
 			else if (file.type === 'DIR'){
 				row.setAttribute('path', file.path + file.name);
 				var folderName = document.createElement('td');
-				folderName.innerHTML = '<span class="glyphicon glyphicon-folder-close"></span> ' + file.name;
+				folderName.innerHTML = '<span class="glyphicon icon-folder-close"></span> ' + file.name;
 				row.appendChild(folderName);
 				var folderSize = document.createElement('td');
 				folderSize.innerHTML = '-';
@@ -73,14 +109,12 @@ var resources = (function() {
 				row.appendChild(folderDate);
 				row.onclick = function(){clickedFolder(this)};
 			}
-			var table = document.getElementById(element);
 			table.appendChild(row);
 		}
 
 	}
 
 	function showFiles( json ){
-		console.log(json);
 		displayFiles(json, 'tableBody');
 	}
 
@@ -103,7 +137,8 @@ var resources = (function() {
 				token : token
 			});
 
-			self.getDetails();
+			clickedFolder(null);
+			//self.getDetails();
 		},
 
 		getDetails : function(path){
