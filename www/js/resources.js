@@ -31,7 +31,6 @@ var resources = (function() {
 		//get path to file on server
 		clearSelection();
 		row.className = 'success';
-		console.log(row.getAttribute('path'));
 	}
 
 	function clickedBreadCrumb(crumb){
@@ -146,6 +145,19 @@ var resources = (function() {
 			path = path || '/';
 			// Ask FME Server for a list of shared resources
 			FMEServer.getResourceDetails( resource, path, showFiles );
+		},
+
+		returnSelected : function(){
+			var selected = document.getElementsByClassName('success');
+			var selRow = selected[0];
+			if (selRow === undefined){
+				return null;
+			}
+			else{
+				var path = selRow.getAttribute('path');
+				path = '"$(FME_SHAREDRESOURCE_DATA)' + path +'"';
+				return path;
+			}
 		}
 
 	};
